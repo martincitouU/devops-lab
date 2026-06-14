@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>devops-lab · Tasks</title>
+  <style>
+    /* ── Reset & Variables ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0f1117;
+      --surface:  #1a1d27;
+      --border:   #2a2d3e;
+      --accent:   #7c6ff7;
+      --accent-h: #9d98fa;
+      --text:     #e2e4f0;
+      --muted:    #6b7280;
+      --done:     #22c55e;
+      --danger:   #ef4444;
+      --radius:   10px;
+      --font:     'Inter', system-ui, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 16px;
+    }
+
+    /* ── Header ────────────────────────────────────────────────────────────── */
+    header {
+      width: 100%;
+      max-width: 640px;
+      margin-bottom: 40px;
+    }
+
+    .logo {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    h1 span { color: var(--muted); font-weight: 400; }
+
+    /* ── Form ──────────────────────────────────────────────────────────────── */
+    .card {
+      width: 100%;
+      max-width: 640px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .card h2 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    input, textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color .15s;
+      margin-bottom: 12px;
+    }
+
+    input:focus, textarea:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 72px; }
+
+    button {
+      cursor: pointer;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      padding: 9px 18px;
+      transition: opacity .15s;
+    }
+
+    button:hover { opacity: .85; }
+
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-done    { background: transparent; border: 1px solid var(--done);   color: var(--done);   padding: 5px 10px; font-size: 12px; }
+    .btn-delete  { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 5px 10px; font-size: 12px; }
+
+    /* ── Task list ─────────────────────────────────────────────────────────── */
+    .task-list { width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: 10px; }
+
+    .task-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      transition: border-color .15s;
+    }
+
+    .task-item.done { opacity: .5; }
+    .task-item.done .task-title { text-decoration: line-through; }
+
+    .task-body { flex: 1; }
+
+    .task-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .task-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .task-actions { display: flex; gap: 8px; }
+
+    /* ── Status badge ──────────────────────────────────────────────────────── */
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .badge-pending  { background: #2a2d3e; color: var(--muted); }
+    .badge-done     { background: #14532d; color: var(--done); }
+
+    /* ── Empty state ───────────────────────────────────────────────────────── */
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 40px 0;
+    }
+
+    /* ── API URL indicator ─────────────────────────────────────────────────── */
+    .api-url {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <p class="logo">devops-lab</p>
+  <h1>Task Manager <span>/ infraestructura en práctica</span></h1>
+  <p class="api-url" id="api-url-label"></p>
+</header>
+
+<!-- Formulario -->
+<div class="card">
+  <h2>Nueva tarea</h2>
+  <input id="title" type="text" placeholder="Título de la tarea" />
+  <textarea id="desc" placeholder="Descripción (opcional)"></textarea>
+  <button class="btn-primary" onclick="createTask()">Agregar tarea</button>
+</div>
+
+<!-- Lista -->
+<div class="task-list" id="task-list">
+  <div class="empty">Cargando tareas…</div>
+</div>
+
+<script>
+  // ── Configuración ─────────────────────────────────────────────────────────
+  // La URL de la API se puede cambiar aquí o inyectar como variable de entorno
+  // en un build de producción. Por ahora apunta al backend local.
+  const API = window.API_URL || "http://localhost:8000";
+
+  document.getElementById("api-url-label").textContent = `API → ${API}`;
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  async function apiFetch(path, options = {}) {
+    const res = await fetch(`${API}${path}`, {
+      headers: { "Content-Type": "application/json" },
+      ...options,
+    });
+    if (!res.ok) throw new Error(`Error ${res.status}`);
+    if (res.status === 204) return null;
+    return res.json();
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────
+  function renderTasks(tasks) {
+    const list = document.getElementById("task-list");
+
+    if (!tasks.length) {
+      list.innerHTML = '<div class="empty">No hay tareas aún. ¡Agrega una arriba.</div>';
+      return;
+    }
+
+    list.innerHTML = tasks.map(t => `
+      <div class="task-item ${t.completed ? 'done' : ''}" id="task-${t.id}">
+        <span class="badge ${t.completed ? 'badge-done' : 'badge-pending'}">
+          ${t.completed ? 'Hecho' : 'Pendiente'}
+        </span>
+        <div class="task-body">
+          <p class="task-title">${escapeHtml(t.title)}</p>
+          ${t.description ? `<p class="task-desc">${escapeHtml(t.description)}</p>` : ''}
+          <div class="task-actions">
+            ${!t.completed ? `<button class="btn-done" onclick="completeTask(${t.id})">✓ Completar</button>` : ''}
+            <button class="btn-delete" onclick="deleteTask(${t.id})">✕ Eliminar</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── CRUD ──────────────────────────────────────────────────────────────────
+  async function loadTasks() {
+    try {
+      const tasks = await apiFetch("/tasks");
+      renderTasks(tasks);
+    } catch {
+      document.getElementById("task-list").innerHTML =
+        '<div class="empty">No se pudo conectar con la API. ¿Está corriendo el backend?</div>';
+    }
+  }
+
+  async function createTask() {
+    const title = document.getElementById("title").value.trim();
+    const description = document.getElementById("desc").value.trim();
+    if (!title) return alert("El título es obligatorio.");
+    await apiFetch("/tasks", {
+      method: "POST",
+      body: JSON.stringify({ title, description }),
+    });
+    document.getElementById("title").value = "";
+    document.getElementById("desc").value = "";
+    loadTasks();
+  }
+
+  async function completeTask(id) {
+    await apiFetch(`/tasks/${id}`, { method: "PUT" });
+    loadTasks();
+  }
+
+  async function deleteTask(id) {
+    await apiFetch(`/tasks/${id}`, { method: "DELETE" });
+    loadTasks();
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  loadTasks();
+</script>
+</body>
+</html>
