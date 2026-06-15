@@ -1,0 +1,25 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+        - name: db
+          image: postgres:15
+          env:
+            - name: POSTGRES_USER
+              value: taskuser
+            - name: POSTGRES_PASSWORD
+              value: taskpass
+            - name: POSTGRES_DB
+              value: tasksdb

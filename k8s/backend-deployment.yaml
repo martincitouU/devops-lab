@@ -1,0 +1,35 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: devops-lab-backend:latest
+          imagePullPolicy: Never
+          ports:
+          - containerPort: 8000
+          env:
+            - name: DB_HOST
+              value: db-service
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: tasksdb
+            - name: DB_USER
+              value: taskuser
+            - name: DB_PASSWORD
+              value: taskpass
+
+
+
