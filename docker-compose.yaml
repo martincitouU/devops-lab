@@ -1,0 +1,26 @@
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: taskuser
+      POSTGRES_PASSWORD: taskpass
+      POSTGRES_DB: tasksdb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taskuser -d tasksdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./app/backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_NAME: tasksdb
+      DB_USER: taskuser
+      DB_PASSWORD: taskpass
