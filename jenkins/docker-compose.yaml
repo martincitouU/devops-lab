@@ -1,0 +1,14 @@
+services:
+  jenkins:
+    build: .
+    ports:
+      - "8081:8080"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  jenkins_home:
+
+## user: admin 
+## password: admim
