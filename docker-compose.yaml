@@ -1,4 +1,3 @@
-
 services:
   db:
     image: postgres:15
@@ -24,3 +23,10 @@ services:
       DB_NAME: tasksdb
       DB_USER: taskuser
       DB_PASSWORD: taskpass
+
+  frontend:
+    build: ./app/frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
