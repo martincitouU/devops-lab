@@ -34,7 +34,7 @@ pipeline {
             steps {
                 sh 'sleep 5'
                 sh 'docker compose ps'
-                sh 'curl -f http://localhost:8000/tasks'
+                sh 'curl -f http://backend:8000/tasks'      
             }
         }
     }
